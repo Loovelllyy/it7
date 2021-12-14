@@ -12,13 +12,13 @@ const createTable = () => {
   table.appendChild(thead);
   table.classList.add('table');
   document.body.appendChild(table);
+
+  return table;
 }
 
 const getUsers = (user, count, table) => {
-    createTable()
-    // const table = document.querySelector(".table");
     const row = document.createElement("tr");
-    row.classList.add(`${'table-row'}`)
+    row.classList.add('table-row')
 
     const cellNum = document.createElement("td");
     const cellLogin = document.createElement("td");
@@ -47,39 +47,54 @@ const throwErr = (e) => {
         Попробуйте обновить страницу`;
 
     console.log(e);
+
     document.body.appendChild(errorBlock);
     errorBlock.appendChild(errorText);
 }
 
-
-let testAsyncAwait = async () => {
+const testAsyncAwait = async (urlString) => {
     try {
-        const res = await fetch(usersUrl);
+        const res = await fetch(urlString);
+        if (!(res.status === 200)) throw new Error();
+
         const usersArr = await res.json();
         let count = 1;
         const table = createTable();
 
+        console.log("Async / await");
+
         for (let user of usersArr) {
-            getUsers(user, count, 1)
+            getUsers(user, count, table);
             count += 1;
         }
     }
     catch (e) {
-        throwErr(e, 0)
+        throwErr(e);
     }
 }
 
 const testPromise = (urlString) => {
     fetch(urlString)
-    .then(response => response.json())
+    .then(response => {
+        if (!(response.status === 200)) throw new Error()
+        else return response.json()
+    })
     .then(usersArr => {
+
         let count = 0;
+        const table = createTable();
+        console.log("Promise");
+
         for (let user of usersArr) {
-            getUsers(user, count, 1)
+            getUsers(user, count, table);
             count += 1;
         }
     })
+    .catch(e => {
+        throwErr(e)
+    })
 }
 
-testAsyncAwait()
-// testPromise(usersUrl)
+
+testAsyncAwait(usersUrl);
+// testPromise(usersUrl);
